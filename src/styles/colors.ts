@@ -1,0 +1,16 @@
+export const COLORS = {
+  brand4: "#4C9AFF",
+  brand6: "#2684FF",
+  white: "#fff",
+  gray0: "#fafafa",
+  gray1: "#f5f5f5",
+  gray2: "#eee",
+  gray3: "#ddd",
+  gray4: "#ccc",
+  gray5: "#aaa",
+  gray6: "#777",
+  gray7: "#555",
+  gray8: "#333",
+  gray9: "#111",
+  black: "#000",
+};
