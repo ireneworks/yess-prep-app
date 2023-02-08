@@ -37,7 +37,7 @@ export default function WorkingHours() {
   };
 
   useEffect(() => {
-    return localData === null
+    !localData
       ? setLocalStorage("workingHours", state)
       : OnChangeOriginWorkingHours(localData);
   }, []);

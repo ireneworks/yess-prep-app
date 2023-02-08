@@ -1,59 +1,43 @@
-import { useEffect, useState } from "react";
-import CatImageApi from "../../api/catImageApi";
+import { useEffect, useRef, useState } from "react";
+import catImageApi from "../../api/catImageApi";
+import { LARGE_SCREEN_SIZE, SMALL_SCREEN_SIZE } from "../../styles/screenSizes";
+import Loader from "./components/loader";
 import styled from "styled-components";
-import ImageItem from "./components/imageItem";
-import Masonry from "react-masonry-css";
-import { COLORS } from "../../styles/colors";
-import {
-  LARGE_SCREEN_SIZE,
-  masonryGridBreakPoints,
-  SMALL_SCREEN_SIZE,
-} from "../../styles/screenSizes";
-import InfiniteScroll from "react-infinite-scroll-component";
+import MasonryLayout from "./components/masonryLayout";
 
 export default function CatViewer() {
   const [imageData, setImageData] = useState<ImageItemType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const observerTargetRef = useRef<HTMLDivElement>(null);
 
-  const fetchData = async () => {
-    const response = await CatImageApi(30);
-    setImageData(imageData.concat(response));
+  const intersectHandler = (entries: IntersectionObserverEntry[]) => {
+    if (entries[0].isIntersecting) {
+      (async function () {
+        const response = await catImageApi(30);
+        setImageData((imageData) => imageData.concat(response));
+        setIsLoading(false);
+      })();
+    }
   };
 
   useEffect(() => {
-    (async function () {
-      const response = await CatImageApi(30);
-      setImageData(response);
-      setIsLoading(!isLoading);
-    })();
-  }, [isLoading]);
+    const observer = new IntersectionObserver(intersectHandler, {
+      threshold: 0.3,
+    });
+    if (observerTargetRef.current) {
+      observer.observe(observerTargetRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <Container>
-      <InfiniteScroll
-        dataLength={imageData.length}
-        next={fetchData}
-        hasMore={true}
-        loader={
-          <p>
-            <span role="img" aria-label="cat">
-              🐈
-            </span>
-            귀여운 고양이를 모으는 중이에요...
-          </p>
-        }
-        pullDownToRefreshThreshold={30}
-      >
-        <Masonry
-          className="masonry-grid"
-          breakpointCols={masonryGridBreakPoints}
-        >
-          {!isLoading &&
-            imageData.map(({ url }, index) => (
-              <ImageItem key={index} imageUrl={url} />
-            ))}
-        </Masonry>
-      </InfiniteScroll>
+      <>
+        {!isLoading && <MasonryLayout source={imageData} />}
+        <div className="observe-box" ref={observerTargetRef}>
+          <Loader />
+        </div>
+      </>
     </Container>
   );
 }
@@ -63,24 +47,17 @@ const Container = styled.div`
   margin-top: 24px;
   padding-bottom: 16px;
 
-  p {
-    margin-top: 120px;
-    text-align: center;
-    font-weight: 700;
-    color: ${COLORS.gray7};
-  }
-
-  .masonry-grid {
-    display: flex;
-    gap: 16px;
-    width: auto;
+  div.observe-box {
+    width: 100%;
+    height: 30px;
+    background: transparent;
   }
 
   @media screen and (max-width: ${LARGE_SCREEN_SIZE}) {
-    margin: 0 24px;
+    margin: 24px;
   }
 
   @media screen and (max-width: ${SMALL_SCREEN_SIZE}) {
-    margin: 0 16px;
+    margin: 16px;
   }
 `;

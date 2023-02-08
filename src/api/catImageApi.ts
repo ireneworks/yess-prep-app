@@ -1,6 +1,6 @@
 import requester from "./config/config";
 
-export default async function CatImageApi(amount: number) {
+export default async function catImageApi(amount: number) {
   const response = await requester.get(`/images/search?limit=${amount}`);
 
   if (response.status !== 200) {
