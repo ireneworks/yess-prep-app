@@ -36,7 +36,7 @@ $ npm start
 │   └── styles                  (Collection of common style variables used within each component)
 ```
 
-### Dependencies
+### Packages
 
 - react
 - typescript
